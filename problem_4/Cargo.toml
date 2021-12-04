@@ -1,0 +1,8 @@
+[package]
+name = "problem_4"
+version = "0.1.0"
+authors = ["Kim Nilsson <kim@wayoftao.net>"]
+edition = "2018"
+
+[dependencies]
+arrayvec = "0.4"
