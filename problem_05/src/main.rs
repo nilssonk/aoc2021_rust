@@ -9,12 +9,9 @@ use crate::plot::*;
 // Traits
 use std::fmt::Debug;
 use std::hash::Hash;
-use std::marker::Send;
-use std::marker::Sync;
 use std::str::FromStr;
 
 // Other
-use rayon::prelude::*;
 use std::collections::HashMap;
 
 fn parse_lines<T>(input: &String) -> impl std::iter::Iterator<Item = Line<T>> + '_
@@ -42,37 +39,21 @@ where
     })
 }
 
-fn solve<'a, I, T, F>(input: I, predicate: F) -> usize
+fn solve<'a, T>(input: impl Iterator<Item = &'a Line<T>>) -> usize
 where
-    I: ParallelIterator<Item = &'a Line<T>>,
-    T: PlottingNumber + Send,
-    F: Fn(&&'a Line<T>) -> bool + Sync,
+    T: 'static + PlottingNumber,
     Vec2<T>: Hash,
 {
-    input
-        .filter(&predicate)
-        .fold(
-            || HashMap::<Vec2<T>, usize>::new(),
-            |mut m, l| {
-                for p in plot_line(l) {
-                    let e = m.entry(p).or_default();
-                    *e += 1;
-                }
+    let mut counts: HashMap<Vec2<T>, u8> = HashMap::new();
 
-                m
-            },
-        )
-        .reduce_with(|mut m1, m2| {
-            for (k, v) in m2 {
-                let e = m1.entry(k).or_default();
-                *e += v;
-            }
-            m1
-        })
-        .unwrap()
-        .into_par_iter()
-        .filter(|&(_, v)| v >= 2)
-        .count()
+    for line in input {
+        for p in plot_line(&line) {
+            let e = counts.entry(p).or_default();
+            *e += 1;
+        }
+    }
+
+    counts.values().filter(|&&v| v >= 2).count()
 }
 
 fn main() {
@@ -86,8 +67,8 @@ fn main() {
 
     let lines: Vec<Line<i32>> = parse_lines::<i32>(&data).collect();
 
-    let answer_one = solve(lines.par_iter(), |(a, b)| a.x == b.x || a.y == b.y);
-    let answer_two = solve(lines.par_iter(), |_| true);
+    let answer_one = solve(lines.iter().filter(|(a, b)| a.x == b.x || a.y == b.y));
+    let answer_two = solve(lines.iter());
 
     println!("{}", answer_one);
     println!("{}", answer_two);
