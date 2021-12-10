@@ -1,42 +1,40 @@
+#[macro_use]
+extern crate lazy_static;
+
 use std::collections::HashMap;
 
 fn score_line(input: &str) -> (usize, usize) {
-    let corrupt_map = |c| match c {
-        ')' => 3,
-        ']' => 57,
-        '}' => 1197,
-        '>' => 25137,
-        _ => 0,
-    };
-    let closer_map = HashMap::from([('(', ')'), ('[', ']'), ('{', '}'), ('<', '>')]);
+    lazy_static! {
+        static ref CORRUPT_MAP: HashMap<char, usize> =
+            HashMap::from([(')', 3), (']', 57), ('}', 1197), ('>', 25137)]);
+        static ref INCOMPLETE_MAP: HashMap<char, usize> =
+            HashMap::from([(')', 1), (']', 2), ('}', 3), ('>', 4)]);
+        static ref CLOSER_MAP: HashMap<char, char> =
+            HashMap::from([('(', ')'), ('[', ']'), ('{', '}'), ('<', '>')]);
+    }
+
+    let corrupt = |x| CORRUPT_MAP.get(&x).cloned().unwrap_or(0);
+    let incomplete = |x| INCOMPLETE_MAP.get(&x).cloned().unwrap_or(0);
 
     let mut expected_closers = Vec::new();
 
     for c in input.chars() {
-        if let Some(&closer) = closer_map.get(&c) {
+        if let Some(&closer) = CLOSER_MAP.get(&c) {
             expected_closers.push(closer);
         } else if let Some(expected) = expected_closers.pop() {
             if c != expected {
-                return (corrupt_map(c), 0);
+                return (corrupt(c), 0);
             }
         } else {
-            return (corrupt_map(c), 0);
+            return (corrupt(c), 0);
         }
     }
 
     // Line is only incomplete
-    let incomplete_map = |c| match c {
-        ')' => 1,
-        ']' => 2,
-        '}' => 3,
-        '>' => 4,
-        _ => 0,
-    };
-
     let incomplete_score = expected_closers
         .into_iter()
         .rev()
-        .fold(0, |acc, c| acc * 5 + incomplete_map(c));
+        .fold(0, |acc, c| acc * 5 + incomplete(c));
 
     (0, incomplete_score)
 }
