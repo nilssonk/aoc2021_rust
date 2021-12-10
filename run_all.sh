@@ -5,5 +5,8 @@ set -e
 cargo build --release
 
 for i in problem*; do
-    cargo run --release --bin $i $i/input.txt
+    echo $i
+    echo ----------------
+    time target/release/$i $i/input.txt
+    echo ----------------
 done
