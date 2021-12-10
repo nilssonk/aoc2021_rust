@@ -1,5 +1,5 @@
 [package]
-name = "problem_3"
+name = "problem_03"
 version = "0.1.0"
 authors = ["Kim Nilsson <kim@wayoftao.net>"]
 edition = "2018"
