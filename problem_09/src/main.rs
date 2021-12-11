@@ -13,40 +13,29 @@ enum Direction {
     Down,
 }
 
-fn at<T>(data: &Vec<T>, width: isize, (x, y): Vec2) -> Option<T>
-where
-    T: Copy,
-{
-    let index = y * width + x;
-    if index < 0 {
-        return None;
-    }
-    let unsigned = index as usize;
-    if unsigned >= data.len() {
+fn at<'a, T>(data: &'a [T], (width, height): Vec2, (x, y): Vec2) -> Option<&'a T> {
+    if x < 0 || x >= width || y < 0 || y >= height {
         return None;
     }
 
-    unsafe { Some(*data.get_unchecked(unsigned)) }
-}
-
-unsafe fn at_unchecked<T>(data: &Vec<T>, width: isize, (x, y): Vec2) -> T
-where
-    T: Copy,
-{
     let index = y * width + x;
-    *data.get_unchecked(index as usize)
+    unsafe { Some(data.get_unchecked(index as usize)) }
 }
 
-fn explore_basin(data: &Vec<u8>, width: isize, start_p: Vec2) -> HashSet<Vec2> {
+unsafe fn at_unchecked<'a, T>(data: &'a [T], (width, _): Vec2, (x, y): Vec2) -> &'a T {
+    let index = y * width + x;
+    data.get_unchecked(index as usize)
+}
+
+fn explore_basin(data: &Vec<u8>, dim @ (width, height): Vec2, start_p: Vec2) -> HashSet<Vec2> {
     use Direction::*;
-    let height = data.len() as isize / width;
 
     let outset: (Vec2, SmallVec<[_; 4]>) = (start_p, smallvec![Left, Right, Up, Down]);
     let mut frontier = VecDeque::from([outset]);
 
     let mut visited = HashSet::new();
     while let Some((p @ (x, y), dirs)) = frontier.pop_front() {
-        let this = unsafe { at_unchecked(data, width, p) };
+        let &this = unsafe { at_unchecked(data, dim, p) };
         if this >= 9 || !visited.insert(p) {
             continue;
         }
@@ -66,13 +55,13 @@ fn explore_basin(data: &Vec<u8>, width: isize, start_p: Vec2) -> HashSet<Vec2> {
     visited
 }
 
-fn find_minima(height_map: &Vec<u8>, width: isize) -> Vec<Vec2> {
+fn find_minima(height_map: &Vec<u8>, dim @ (width, height): Vec2) -> Vec<Vec2> {
     let is_minimum = |(x, y)| {
-        let this = unsafe { at_unchecked(&height_map, width, (x, y)) };
+        let this = unsafe { at_unchecked(&height_map, dim, (x, y)) };
 
         let neighbors = [(x, y - 1), (x - 1, y), (x + 1, y), (x, y + 1)];
         for p in neighbors {
-            if let Some(adj) = at(&height_map, width, p) {
+            if let Some(adj) = at(&height_map, dim, p) {
                 if this >= adj {
                     return false;
                 }
@@ -84,35 +73,39 @@ fn find_minima(height_map: &Vec<u8>, width: isize) -> Vec<Vec2> {
 
     let mut minima = Vec::new();
     let mut y = 0;
-    let height = height_map.len() as isize / width;
     while y < height {
         let mut x = 0;
         while x < width {
             let p = (x, y);
             if is_minimum(p) {
                 minima.push(p);
+
+                // Skip next in line since it is by definition not a minimum
                 x += 1;
             }
+
             x += 1;
         }
+
         y += 1;
     }
+
     minima
 }
 
-fn solve_one(height_map: &Vec<u8>, width: isize, input: &Vec<Vec2>) -> usize {
+fn solve_one(height_map: &Vec<u8>, dim: Vec2, input: &Vec<Vec2>) -> usize {
     // Sum of x+1 over all minima x
     input.iter().fold(0, |acc, &p| {
-        let val = unsafe { at_unchecked(&height_map, width, p) } as usize;
-        acc + val + 1
+        let &val = unsafe { at_unchecked(&height_map, dim, p) };
+        acc + val as usize + 1
     })
 }
 
-fn solve_two(height_map: &Vec<u8>, width: isize, input: &Vec<Vec2>) -> usize {
+fn solve_two(height_map: &Vec<u8>, dim: Vec2, input: &Vec<Vec2>) -> usize {
     // Find unique basins
     let mut basins: Vec<HashSet<Vec2>> = input
         .iter()
-        .map(|&p| explore_basin(&height_map, width, p))
+        .map(|&p| explore_basin(&height_map, dim, p))
         .collect();
     basins.dedup();
 
@@ -141,10 +134,13 @@ fn main() {
         .map(|c| c as u8 - '0' as u8)
         .collect();
 
-    let minima = find_minima(&height_map, width);
+    let height = height_map.len() as isize / width;
+    let dim = (width, height);
 
-    let answer_one = solve_one(&height_map, width, &minima);
-    let answer_two = solve_two(&height_map, width, &minima);
+    let minima = find_minima(&height_map, dim);
+
+    let answer_one = solve_one(&height_map, dim, &minima);
+    let answer_two = solve_two(&height_map, dim, &minima);
 
     println!("{}", answer_one);
     println!("{}", answer_two);
