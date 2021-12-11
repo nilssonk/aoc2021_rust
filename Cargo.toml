@@ -10,5 +10,6 @@ members = [
     "problem_07",
     "problem_08",
     "problem_09",
-    "problem_10"
+    "problem_10",
+    "problem_11"
 ]
