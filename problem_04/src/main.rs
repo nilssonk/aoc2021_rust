@@ -1,5 +1,5 @@
 use arrayvec::ArrayVec;
-use std::collections::HashMap;
+use fnv::FnvHashMap;
 
 struct Square {
     data: u8,
@@ -26,19 +26,19 @@ impl Square {
 }
 
 struct BingoBoard {
-    pub rows: ArrayVec<[ArrayVec<[Square; 5]>; 5]>,
-    numbers: HashMap<u8, usize>,
+    pub rows: ArrayVec<ArrayVec<Square, 5>, 5>,
+    numbers: FnvHashMap<u8, usize>,
 }
 
 impl BingoBoard {
     pub fn new() -> Self {
         Self {
             rows: ArrayVec::new(),
-            numbers: HashMap::new(),
+            numbers: FnvHashMap::default(),
         }
     }
 
-    pub fn add_row(&mut self, row: ArrayVec<[u8; 5]>) {
+    pub fn add_row(&mut self, row: ArrayVec<u8, 5>) {
         self.rows
             .push(row.iter().map(|&n| Square::new(n)).collect());
         let index = self.rows.len() - 1;
@@ -80,7 +80,7 @@ impl BingoBoard {
     }
 }
 
-type BingoMap = HashMap<usize, BingoBoard>;
+type BingoMap = FnvHashMap<usize, BingoBoard>;
 
 fn parse_draws(data: String) -> Vec<u8> {
     data.split(',')

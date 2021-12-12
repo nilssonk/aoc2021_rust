@@ -1,7 +1,7 @@
 use smallvec::smallvec;
 use smallvec::SmallVec;
 
-use std::collections::HashSet;
+use fnv::FnvHashSet;
 use std::collections::VecDeque;
 
 type Vec2 = (isize, isize);
@@ -27,13 +27,13 @@ unsafe fn at_unchecked<'a, T>(data: &'a [T], (width, _): Vec2, (x, y): Vec2) -> 
     data.get_unchecked(index as usize)
 }
 
-fn explore_basin(data: &Vec<u8>, dim @ (width, height): Vec2, start_p: Vec2) -> HashSet<Vec2> {
+fn explore_basin(data: &Vec<u8>, dim @ (width, height): Vec2, start_p: Vec2) -> FnvHashSet<Vec2> {
     use Direction::*;
 
     let outset: (Vec2, SmallVec<[_; 4]>) = (start_p, smallvec![Left, Right, Up, Down]);
     let mut frontier = VecDeque::from([outset]);
 
-    let mut visited = HashSet::new();
+    let mut visited = FnvHashSet::default();
     while let Some((p @ (x, y), dirs)) = frontier.pop_front() {
         let &this = unsafe { at_unchecked(data, dim, p) };
         if this >= 9 || !visited.insert(p) {
@@ -103,7 +103,7 @@ fn solve_one(height_map: &Vec<u8>, dim: Vec2, input: &Vec<Vec2>) -> usize {
 
 fn solve_two(height_map: &Vec<u8>, dim: Vec2, input: &Vec<Vec2>) -> usize {
     // Find unique basins
-    let mut basins: Vec<HashSet<Vec2>> = input
+    let mut basins: Vec<FnvHashSet<Vec2>> = input
         .iter()
         .map(|&p| explore_basin(&height_map, dim, p))
         .collect();

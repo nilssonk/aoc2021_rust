@@ -12,7 +12,7 @@ use std::hash::Hash;
 use std::str::FromStr;
 
 // Other
-use std::collections::HashMap;
+use fnv::FnvHashMap;
 
 fn parse_lines<T>(input: &String) -> impl std::iter::Iterator<Item = Line<T>> + '_
 where
@@ -44,7 +44,7 @@ where
     T: 'static + PlottingNumber,
     Vec2<T>: Hash,
 {
-    let mut counts: HashMap<Vec2<T>, u8> = HashMap::new();
+    let mut counts: FnvHashMap<Vec2<T>, u8> = FnvHashMap::default();
 
     for line in input {
         for p in plot_line(&line) {
