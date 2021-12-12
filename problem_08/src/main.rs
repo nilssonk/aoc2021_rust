@@ -1,14 +1,15 @@
 #[macro_use]
 extern crate lazy_static;
 
+use fnv::FnvHashMap;
+use fnv::FnvHashSet;
+
 use itertools::Itertools;
-use std::collections::HashMap;
-use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::iter::FromIterator;
 
 lazy_static! {
-    static ref CHAR_TO_DIGIT: HashMap<char, i8> = HashMap::from([
+    static ref CHAR_TO_DIGIT: FnvHashMap<char, i8> = [
         ('a', 0),
         ('b', 1),
         ('c', 2),
@@ -16,16 +17,16 @@ lazy_static! {
         ('e', 4),
         ('f', 5),
         ('g', 6),
-    ]);
-    static ref DIGIT_TO_CHAR: HashMap<i8, char> = {
+    ].iter().cloned().collect();
+    static ref DIGIT_TO_CHAR: FnvHashMap<i8, char> = {
         // Inverse of CHAR_TO_NUM
-        let mut result = HashMap::new();
+        let mut result = FnvHashMap::default();
         for (&k, &v) in CHAR_TO_DIGIT.iter() {
             result.insert(v, k);
         }
         result
     };
-    static ref STR_TO_SEGMENT_VALUE: HashMap<String, u8> = HashMap::from([
+    static ref STR_TO_SEGMENT_VALUE: FnvHashMap<String, u8> = [
         ("abcefg".to_owned(), 0),
         ("cf".to_owned(), 1),
         ("acdeg".to_owned(), 2),
@@ -36,7 +37,7 @@ lazy_static! {
         ("acf".to_owned(), 7),
         ("abcdefg".to_owned(), 8),
         ("abcdfg".to_owned(), 9)
-    ]);
+    ].iter().cloned().collect();
 }
 
 fn deduce_impl(
@@ -55,7 +56,7 @@ fn deduce_impl(
     }
 
     // Permute original values using current state while masking out values for which no permutation has been defined
-    let generated: HashSet<Vec<i8>> = CORRECT
+    let generated: FnvHashSet<Vec<i8>> = CORRECT
         .iter()
         .map(|m| {
             m.iter()

@@ -1,16 +1,25 @@
 #[macro_use]
 extern crate lazy_static;
 
-use std::collections::HashMap;
+use fnv::FnvHashMap;
 
 fn score_line(input: &str) -> (usize, usize) {
     lazy_static! {
-        static ref CORRUPT_MAP: HashMap<char, usize> =
-            HashMap::from([(')', 3), (']', 57), ('}', 1197), ('>', 25137)]);
-        static ref INCOMPLETE_MAP: HashMap<char, usize> =
-            HashMap::from([(')', 1), (']', 2), ('}', 3), ('>', 4)]);
-        static ref CLOSER_MAP: HashMap<char, char> =
-            HashMap::from([('(', ')'), ('[', ']'), ('{', '}'), ('<', '>')]);
+        static ref CORRUPT_MAP: FnvHashMap<char, usize> =
+            [(')', 3), (']', 57), ('}', 1197), ('>', 25137)]
+                .iter()
+                .cloned()
+                .collect();
+        static ref INCOMPLETE_MAP: FnvHashMap<char, usize> =
+            [(')', 1), (']', 2), ('}', 3), ('>', 4)]
+                .iter()
+                .cloned()
+                .collect();
+        static ref CLOSER_MAP: FnvHashMap<char, char> =
+            [('(', ')'), ('[', ']'), ('{', '}'), ('<', '>')]
+                .iter()
+                .cloned()
+                .collect();
     }
 
     let corrupt = |x| CORRUPT_MAP.get(&x).cloned().unwrap_or(0);

@@ -5,5 +5,6 @@ authors = ["Kim Nilsson <kim@wayoftao.net>"]
 edition = "2018"
 
 [dependencies]
+fnv = "1.0"
 itertools = "0.10"
 lazy_static = "1.4"

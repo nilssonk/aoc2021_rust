@@ -1,4 +1,4 @@
-type ResultCache = std::collections::HashMap<(u16, u8), usize>;
+type ResultCache = fnv::FnvHashMap<(u16, u8), usize>;
 
 fn spawn(days: u16, until_spawn: u8, cache: &mut ResultCache) -> usize {
     if let Some(&cached) = cache.get(&(days, until_spawn)) {
@@ -36,7 +36,7 @@ fn main() {
         .map(|s| s.parse::<u8>().expect("Unable to parse integer"))
         .collect();
 
-    let mut cache = ResultCache::new();
+    let mut cache = ResultCache::default();
     let answer_one = simulate(&fishies, 80, &mut cache);
     let answer_two = simulate(&fishies, 256, &mut cache);
 
