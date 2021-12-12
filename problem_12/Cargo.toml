@@ -1,0 +1,11 @@
+[package]
+name = "problem_12"
+version = "0.1.0"
+authors = ["Kim Nilsson <kim@wayoftao.net>"]
+edition = "2018"
+
+[dependencies]
+fnv = "1.0"
+stable-vec = "0.4"
+smallvec = "1.7"
+
