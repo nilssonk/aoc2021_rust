@@ -9,7 +9,48 @@ enum Fold {
     Horizontal(i32),
 }
 
-fn fold(points: &mut FnvHashSet<(i32, i32)>, (w, h): Vec2, f: Fold) -> Vec2 {
+fn parse_input(input: &str) -> (FnvHashSet<Vec2>, Vec<Fold>) {
+    let mut points = FnvHashSet::default();
+    let mut folds = Vec::new();
+
+    // Capture (x,y) or "fold along coord_name=coord_value"
+    let re =
+        Regex::new(r"((?P<x>\d+),(?P<y>\d+)|fold along (?P<coord_name>.)=(?P<coord_value>\d+))")
+            .unwrap();
+
+    let rows = input.split('\n').filter(|s| !s.is_empty());
+    for r in rows {
+        let caps = re.captures(r).expect("Unable to capture regex");
+        if let Some(x_cap) = caps.name("x") {
+            let x_str = x_cap.as_str();
+            let y_str = caps.name("y").unwrap().as_str();
+
+            let parse_int = |s: &str| s.parse::<i32>().expect("Unable to parse integer");
+            let x = parse_int(x_str);
+            let y = parse_int(y_str);
+
+            points.insert((x, y));
+        } else {
+            let name = caps.name("coord_name").unwrap().as_str();
+            let value = caps
+                .name("coord_value")
+                .unwrap()
+                .as_str()
+                .parse::<i32>()
+                .expect("Unable to parse integer");
+
+            if name == "x" {
+                folds.push(Fold::Horizontal(value));
+            } else {
+                folds.push(Fold::Vertical(value));
+            }
+        }
+    }
+
+    (points, folds)
+}
+
+fn fold(points: &mut FnvHashSet<Vec2>, (w, h): Vec2, f: Fold) -> Vec2 {
     let (reflected, new_dim): (Vec<Vec2>, Vec2) = match f {
         Fold::Horizontal(new_w) => (
             points
@@ -46,42 +87,8 @@ fn main() {
     }
 
     let data = std::fs::read_to_string(&args[1]).expect("Unable to open input file");
-    let rows = data.split('\n').filter(|s| !s.is_empty());
 
-    // Capture (x,y) or "fold along coord_name=coord_value"
-    let re =
-        Regex::new(r"((?P<x>\d+),(?P<y>\d+)|fold along (?P<coord_name>.)=(?P<coord_value>\d+))")
-            .unwrap();
-
-    let mut points = FnvHashSet::default();
-    let mut folds = Vec::new();
-    for r in rows {
-        let caps = re.captures(r).expect("Unable to capture regex");
-        if let Some(x_cap) = caps.name("x") {
-            let x_str = x_cap.as_str();
-            let y_str = caps.name("y").unwrap().as_str();
-
-            let parse_int = |s: &str| s.parse::<i32>().expect("Unable to parse integer");
-            let x = parse_int(x_str);
-            let y = parse_int(y_str);
-
-            points.insert((x, y));
-        } else {
-            let name = caps.name("coord_name").unwrap().as_str();
-            let value = caps
-                .name("coord_value")
-                .unwrap()
-                .as_str()
-                .parse::<i32>()
-                .expect("Unable to parse integer");
-
-            if name == "x" {
-                folds.push(Fold::Horizontal(value));
-            } else {
-                folds.push(Fold::Vertical(value));
-            }
-        }
-    }
+    let (mut points, folds) = parse_input(&data);
 
     let width = points.iter().map(|&(x, _)| x).max().unwrap();
     let height = points.iter().map(|&(_, y)| y).max().unwrap();
