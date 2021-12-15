@@ -1,0 +1,9 @@
+[package]
+name = "common"
+version = "0.1.0"
+authors = ["Kim Nilsson <kim@wayoftao.net>"]
+edition = "2018"
+
+[dependencies]
+num-traits = "0.2"
+
