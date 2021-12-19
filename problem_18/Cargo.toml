@@ -1,0 +1,13 @@
+[package]
+name = "problem_18"
+version = "0.1.0"
+authors = ["Kim Nilsson <kim@wayoftao.net>"]
+edition = "2018"
+
+[dependencies]
+itertools = "0.10"
+lalrpop-util = "0.19.6"
+regex = "1.5"
+
+[build-dependencies]
+lalrpop = "0.19.6"
