@@ -1,0 +1,11 @@
+use crate::ast::SnailNumber;
+use std::str::FromStr;
+
+grammar;
+
+pub SnailNumber: Box<SnailNumber> = {
+    <a:Num> => SnailNumber::new_leaf(a),
+    "[" <a:SnailNumber> "," <b:SnailNumber> "]" => SnailNumber::new_node(a,b),
+};
+
+Num: usize = <s:r"[0-9]+"> => usize::from_str(s).unwrap();
