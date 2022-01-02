@@ -69,7 +69,7 @@ fn main() {
     let width = first.len() as isize;
     let mut energy_map: Vec<u8> = rows
         .flat_map(|s| s.chars())
-        .map(|c| c as u8 - '0' as u8)
+        .map(|c| c as u8 - b'0')
         .collect();
 
     let height = energy_map.len() as isize / width;

@@ -74,10 +74,7 @@ impl SnailNumber {
         let mut new = Box::new(Self {
             parent: std::ptr::null_mut(),
             direction: None,
-            data: Node(crate::ast::Node {
-                left: left,
-                right: right,
-            }),
+            data: Node(crate::ast::Node { left, right }),
         });
 
         let new_ptr: *mut SnailNumber = &mut *new;
@@ -102,7 +99,7 @@ impl SnailNumber {
 
     fn new_leaf_with_metadata(value: usize, parent: *mut Self, direction: Direction) -> Box<Self> {
         Box::new(Self {
-            parent: parent,
+            parent,
             direction: Some(direction),
             data: SnailNumberType::Leaf(value),
         })

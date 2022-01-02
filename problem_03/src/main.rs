@@ -2,16 +2,16 @@ fn solve_one(input: &[u16], width: usize) -> u32 {
     // Count bits per position
     let mut counts = vec![0_u16; width];
     for r in input {
-        for i in 0..width {
-            counts[i] += (r & (1 << i) != 0) as u16;
+        for (i, count) in counts.iter_mut().enumerate() {
+            *count += (r & (1 << i) != 0) as u16;
         }
     }
 
     // Compile most common bits to gamma
     let predicate = |x| x as usize * 2 > input.len();
     let mut gamma = 0_u32;
-    for i in 0..width {
-        let bit_value = predicate(counts[i]) as u32;
+    for (i, count) in counts.iter().enumerate() {
+        let bit_value = predicate(*count) as u32;
         gamma |= bit_value << i;
     }
 

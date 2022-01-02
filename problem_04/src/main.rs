@@ -118,7 +118,7 @@ fn do_draw(draw: u8, boards: &mut BingoMap) -> Option<usize> {
     None
 }
 
-fn play(draws: &Vec<u8>, boards: &mut BingoMap) -> Option<(usize, u8)> {
+fn play(draws: &[u8], boards: &mut BingoMap) -> Option<(usize, u8)> {
     for &d in draws {
         if let Some(winning_index) = do_draw(d, boards) {
             return Some((winning_index, d));
@@ -140,18 +140,18 @@ fn count_score(boards: &BingoMap, index: usize, draw: u8) -> u32 {
     sum_of_unmarked * draw as u32
 }
 
-fn solve_one(draws: &Vec<u8>, boards: &mut BingoMap) -> u32 {
-    let (winning_index, winning_draw) = play(&draws, boards).expect("No winner found");
-    count_score(&boards, winning_index, winning_draw)
+fn solve_one(draws: &[u8], boards: &mut BingoMap) -> u32 {
+    let (winning_index, winning_draw) = play(draws, boards).expect("No winner found");
+    count_score(boards, winning_index, winning_draw)
 }
 
-fn solve_two(draws: &Vec<u8>, mut boards: BingoMap) -> u32 {
+fn solve_two(draws: &[u8], mut boards: BingoMap) -> u32 {
     while boards.len() > 1 {
-        let (w, _) = play(&draws, &mut boards).expect("No winner found");
+        let (w, _) = play(draws, &mut boards).expect("No winner found");
         boards.remove(&w);
     }
 
-    let (winning_index, winning_draw) = play(&draws, &mut boards).expect("No winner found");
+    let (winning_index, winning_draw) = play(draws, &mut boards).expect("No winner found");
     count_score(&boards, winning_index, winning_draw)
 }
 

@@ -13,9 +13,9 @@ pub struct Array2D<'a, T, U> {
 impl<'a, T, U> Array2D<'a, T, U> {
     pub fn from_vec(data: Vec<T>, (width, height): (U, U)) -> Self {
         Self {
-            data: data,
-            width: width,
-            height: height,
+            data,
+            width,
+            height,
             phantom: PhantomData,
         }
     }
@@ -28,9 +28,9 @@ impl<'a, T, U> Array2D<'a, T, U> {
         let data: Vec<T> = input.collect();
         let height = U::from(data.len() / width.to_usize().unwrap()).unwrap();
         Self {
-            data: data,
-            width: width,
-            height: height,
+            data,
+            width,
+            height,
             phantom: PhantomData,
         }
     }
@@ -53,6 +53,8 @@ impl<'a, T, U> Array2D<'a, T, U> {
         x < U::zero() || x >= self.width || y < U::zero() || y >= self.height
     }
 
+    /// # Safety
+    /// No bounds checking will occur.
     pub unsafe fn get_unchecked(&self, (x, y): (U, U)) -> &T
     where
         U: PrimInt,
@@ -61,7 +63,8 @@ impl<'a, T, U> Array2D<'a, T, U> {
             y.to_usize().unwrap() * self.width.to_usize().unwrap() + x.to_usize().unwrap();
         self.data.get_unchecked(index)
     }
-
+    /// # Safety
+    /// No bounds checking will occur.
     pub unsafe fn get_unchecked_mut(&mut self, (x, y): (U, U)) -> &mut T
     where
         U: PrimInt,
@@ -69,5 +72,20 @@ impl<'a, T, U> Array2D<'a, T, U> {
         let index: usize =
             y.to_usize().unwrap() * self.width.to_usize().unwrap() + x.to_usize().unwrap();
         self.data.get_unchecked_mut(index)
+    }
+}
+
+impl<'a, T, U> std::fmt::Debug for Array2D<'a, T, U>
+where
+    T: std::fmt::Debug,
+    U: std::fmt::Debug + PrimInt + std::iter::Step,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for r in U::zero()..self.height {
+            let start = r.to_usize().unwrap() * self.width.to_usize().unwrap();
+            let end = start + self.width.to_usize().unwrap();
+            writeln!(f, "{:?}", &self.data[start..end])?;
+        }
+        Ok(())
     }
 }

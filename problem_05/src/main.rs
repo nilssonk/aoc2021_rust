@@ -14,7 +14,7 @@ use std::str::FromStr;
 // Other
 use fnv::FnvHashMap;
 
-fn parse_lines<T>(input: &String) -> impl std::iter::Iterator<Item = Line<T>> + '_
+fn parse_lines<T>(input: &str) -> impl std::iter::Iterator<Item = Line<T>> + '_
 where
     T: FromStr,
     T::Err: Debug,
@@ -47,7 +47,7 @@ where
     let mut counts: FnvHashMap<Vec2<T>, u8> = FnvHashMap::default();
 
     for line in input {
-        for p in plot_line(&line) {
+        for p in plot_line(line) {
             let e = counts.entry(p).or_default();
             *e += 1;
         }

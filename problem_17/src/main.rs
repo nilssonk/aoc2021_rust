@@ -76,10 +76,7 @@ fn main() {
         }
     }
 
-    let answer_one = valid_vs
-        .last()
-        .and_then(|&(vy, _)| Some(pos_after_n(vy, vy)))
-        .unwrap();
+    let answer_one = valid_vs.last().map(|&(vy, _)| pos_after_n(vy, vy)).unwrap();
     let answer_two = valid_vs.len();
 
     println!("{}", answer_two);

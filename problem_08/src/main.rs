@@ -51,7 +51,7 @@ fn deduce_impl(
         ]
         .iter()
         .map(|s| s.chars().map(|c| CHAR_TO_DIGIT[&c]).sorted())
-        .map(|v| Vec::from_iter(v))
+        .map(Vec::from_iter)
         .collect();
     }
 
@@ -72,6 +72,7 @@ fn deduce_impl(
         })
         .collect();
 
+    #[allow(clippy::collapsible_if)]
     let check_constraints = |g: &Vec<i8>| {
         for c in constraints.iter().filter(|x| x.len() == g.len()) {
             if c.len() == g.len() {
@@ -125,7 +126,7 @@ fn deduce(constraints: &VecDeque<Vec<i8>>) -> Vec<i8> {
     table
 }
 
-fn decode(permutation_table: &Vec<i8>, mut msg: Vec<i8>) -> Vec<i8> {
+fn decode(permutation_table: &[i8], mut msg: Vec<i8>) -> Vec<i8> {
     for m in msg.iter_mut() {
         *m = permutation_table[*m as usize];
     }
@@ -141,28 +142,23 @@ fn main() {
     }
 
     let data = std::fs::read_to_string(&args[1]).expect("Unable to open input file");
-    let mini_problems: Vec<(VecDeque<Vec<i8>>, VecDeque<Vec<i8>>)> = data
-        .lines()
-        .filter(|s| !s.is_empty())
-        .map(|s| {
-            let mut parts = s.split('|');
-            let process_next = |x: &mut std::str::Split<char>| {
-                x.next()
-                    .expect("Unable to read problem")
-                    .split(' ')
-                    .filter(|s| !s.is_empty())
-                    .map(|s| s.chars().map(|c| CHAR_TO_DIGIT[&c]).sorted().collect())
-                    .collect()
-            };
-            let input = process_next(&mut parts);
-            let msg = process_next(&mut parts);
-            (input, msg)
-        })
-        .collect();
+    let mini_problems = data.lines().filter(|s| !s.is_empty()).map(|s| {
+        let mut parts = s.split('|');
+        let process_next = |x: &mut std::str::Split<char>| {
+            x.next()
+                .expect("Unable to read problem")
+                .split(' ')
+                .filter(|s| !s.is_empty())
+                .map(|s| s.chars().map(|c| CHAR_TO_DIGIT[&c]).sorted().collect())
+                .collect()
+        };
+        let input = process_next(&mut parts);
+        let msg = process_next(&mut parts);
+        (input, msg)
+    });
 
     // Deduce permutation table from the given miniproblem and apply it to the validation output
     let solutions: Vec<Vec<u8>> = mini_problems
-        .into_iter()
         .map(|(problem, msg)| {
             let permutation_table = deduce(&problem);
 

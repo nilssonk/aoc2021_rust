@@ -58,12 +58,12 @@ fn main() {
     let data = std::fs::read_to_string(&args[1]).expect("Unable to open input file");
     let rows = data.split('\n').filter(|s| !s.is_empty());
 
-    let (corrupted, mut incomplete): (Vec<_>, Vec<_>) = rows.map(|s| score_line(s)).unzip();
+    let (corrupted, mut incomplete): (Vec<_>, Vec<_>) = rows.map(score_line).unzip();
 
     let answer_one = corrupted.iter().sum::<usize>();
 
     incomplete.retain(|&x| x != 0);
-    incomplete.sort();
+    incomplete.sort_unstable();
     let answer_two = incomplete[incomplete.len() / 2];
 
     println!("{}", answer_one);
