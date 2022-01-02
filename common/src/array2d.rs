@@ -46,6 +46,17 @@ impl<'a, T, U> Array2D<'a, T, U> {
         Some(unsafe { self.get_unchecked(index) })
     }
 
+    pub fn get_mut(&mut self, index: (U, U)) -> Option<&mut T>
+    where
+        U: PrimInt,
+    {
+        if self.out_of_bounds(index) {
+            return None;
+        }
+
+        Some(unsafe { self.get_unchecked_mut(index) })
+    }
+
     fn out_of_bounds(&self, (x, y): (U, U)) -> bool
     where
         U: PrimInt,
