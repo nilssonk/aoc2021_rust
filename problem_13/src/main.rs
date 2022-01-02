@@ -76,7 +76,7 @@ fn fold(points: &mut FnvHashSet<Vec2>, (w, h): Vec2, f: Fold) -> Vec2 {
 
     points.retain(|&(x, y)| x >= 0 && x <= new_dim.0 && y >= 0 && y <= new_dim.1);
 
-    return new_dim;
+    new_dim
 }
 
 fn main() {
@@ -115,6 +115,6 @@ fn main() {
                 print!(".");
             }
         }
-        println!("");
+        println!();
     }
 }

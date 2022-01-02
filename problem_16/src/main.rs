@@ -147,7 +147,7 @@ fn parse_operator(input: &[u8], version: u8, op_type: u8, position: &mut usize) 
     };
 
     Some(Packet {
-        version: version,
+        version,
         packet_type: PacketType::Op(Operator {
             op_type: operator_type(op_type),
             subpackets: parse(input, position, limit_type),
@@ -173,14 +173,14 @@ fn parse(input: &[u8], position: &mut usize, max: Limit) -> Vec<Packet> {
     let mut result = Vec::new();
 
     let parse_one = |pos: &mut usize| {
-        let v = read_bits(&input, pos, 3)?;
-        let t = read_bits(&input, pos, 3)?;
+        let v = read_bits(input, pos, 3)?;
+        let t = read_bits(input, pos, 3)?;
 
         match t[0] {
             4 => {
                 let mut literal = Vec::new();
                 loop {
-                    let tmp = read_bits(&input, pos, 5)?;
+                    let tmp = read_bits(input, pos, 5)?;
                     literal.push(tmp[0]);
                     if tmp[1] == 0 {
                         break;
@@ -192,7 +192,7 @@ fn parse(input: &[u8], position: &mut usize, max: Limit) -> Vec<Packet> {
                     packet_type: PacketType::Lit(concat_usize(&literal)),
                 })
             }
-            op_type => parse_operator(&input, v[0], op_type, pos),
+            op_type => parse_operator(input, v[0], op_type, pos),
         }
     };
 
@@ -216,11 +216,11 @@ fn main() {
     let parse_hex = |char| {
         let b = char as u8;
         if char >= 'a' {
-            b - 'a' as u8 + 10
+            b - b'a' + 10
         } else if char >= 'A' {
-            b - 'A' as u8 + 10
+            b - b'A' + 10
         } else {
-            b - '0' as u8
+            b - b'0'
         }
     };
 
@@ -233,6 +233,6 @@ fn main() {
     let answer_one = packets.iter().map(|p| p.sum_version()).sum::<usize>();
     println!("{}", answer_one);
 
-    let answer_two = packets.iter().next().expect("Must have one packet").eval();
+    let answer_two = packets.get(0).expect("Must have one packet").eval();
     println!("{}", answer_two);
 }

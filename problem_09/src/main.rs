@@ -2,6 +2,7 @@ use smallvec::smallvec;
 use smallvec::SmallVec;
 
 use fnv::FnvHashSet;
+use std::cmp::Reverse;
 use std::collections::VecDeque;
 
 type Vec2 = (isize, isize);
@@ -13,7 +14,7 @@ enum Direction {
     Down,
 }
 
-fn at<'a, T>(data: &'a [T], (width, height): Vec2, (x, y): Vec2) -> Option<&'a T> {
+fn at<T>(data: &[T], (width, height): Vec2, (x, y): Vec2) -> Option<&T> {
     if x < 0 || x >= width || y < 0 || y >= height {
         return None;
     }
@@ -22,12 +23,12 @@ fn at<'a, T>(data: &'a [T], (width, height): Vec2, (x, y): Vec2) -> Option<&'a T
     unsafe { Some(data.get_unchecked(index as usize)) }
 }
 
-unsafe fn at_unchecked<'a, T>(data: &'a [T], (width, _): Vec2, (x, y): Vec2) -> &'a T {
+unsafe fn at_unchecked<T>(data: &[T], (width, _): Vec2, (x, y): Vec2) -> &T {
     let index = y * width + x;
     data.get_unchecked(index as usize)
 }
 
-fn explore_basin(data: &Vec<u8>, dim @ (width, height): Vec2, start_p: Vec2) -> FnvHashSet<Vec2> {
+fn explore_basin(data: &[u8], dim @ (width, height): Vec2, start_p: Vec2) -> FnvHashSet<Vec2> {
     use Direction::*;
 
     let outset: (Vec2, SmallVec<[_; 4]>) = (start_p, smallvec![Left, Right, Up, Down]);
@@ -55,13 +56,13 @@ fn explore_basin(data: &Vec<u8>, dim @ (width, height): Vec2, start_p: Vec2) -> 
     visited
 }
 
-fn find_minima(height_map: &Vec<u8>, dim @ (width, height): Vec2) -> Vec<Vec2> {
+fn find_minima(height_map: &[u8], dim @ (width, height): Vec2) -> Vec<Vec2> {
     let is_minimum = |(x, y)| {
-        let this = unsafe { at_unchecked(&height_map, dim, (x, y)) };
+        let this = unsafe { at_unchecked(height_map, dim, (x, y)) };
 
         let neighbors = [(x, y - 1), (x - 1, y), (x + 1, y), (x, y + 1)];
         for p in neighbors {
-            if let Some(adj) = at(&height_map, dim, p) {
+            if let Some(adj) = at(height_map, dim, p) {
                 if this >= adj {
                     return false;
                 }
@@ -93,24 +94,24 @@ fn find_minima(height_map: &Vec<u8>, dim @ (width, height): Vec2) -> Vec<Vec2> {
     minima
 }
 
-fn solve_one(height_map: &Vec<u8>, dim: Vec2, input: &Vec<Vec2>) -> usize {
+fn solve_one(height_map: &[u8], dim: Vec2, input: &[Vec2]) -> usize {
     // Sum of x+1 over all minima x
     input.iter().fold(0, |acc, &p| {
-        let &val = unsafe { at_unchecked(&height_map, dim, p) };
+        let &val = unsafe { at_unchecked(height_map, dim, p) };
         acc + val as usize + 1
     })
 }
 
-fn solve_two(height_map: &Vec<u8>, dim: Vec2, input: &Vec<Vec2>) -> usize {
+fn solve_two(height_map: &[u8], dim: Vec2, input: &[Vec2]) -> usize {
     // Find unique basins
     let mut basins: Vec<FnvHashSet<Vec2>> = input
         .iter()
-        .map(|&p| explore_basin(&height_map, dim, p))
+        .map(|&p| explore_basin(height_map, dim, p))
         .collect();
     basins.dedup();
 
     // Take the product of the 3 largest
-    basins.sort_by(|a, b| b.len().cmp(&a.len()));
+    basins.sort_by_key(|x| Reverse(x.len()));
 
     basins.iter().map(|x| x.len()).take(3).product::<usize>()
 }
@@ -131,7 +132,7 @@ fn main() {
 
     let height_map: Vec<u8> = rows
         .flat_map(|s| s.chars())
-        .map(|c| c as u8 - '0' as u8)
+        .map(|c| c as u8 - b'0')
         .collect();
 
     let height = height_map.len() as isize / width;

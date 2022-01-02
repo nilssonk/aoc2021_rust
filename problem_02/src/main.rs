@@ -64,7 +64,7 @@ fn main() {
     let (pos_one, pos_two) = commands.fold(
         (PositionOne::default(), PositionTwo::default()),
         |(acc_one, acc_two), s| {
-            let cap = re.captures(&s).expect("Regex capture failed");
+            let cap = re.captures(s).expect("Regex capture failed");
 
             let dist = cap[2].parse::<u32>().expect("Integer parsing failed");
             use Direction::*;

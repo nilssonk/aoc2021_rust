@@ -4,7 +4,7 @@ use fnv::FnvHashMap;
 
 type MutationMap<'a> = FnvHashMap<&'a str, (String, String)>;
 
-fn parse_input(input: &String) -> (Vec<char>, MutationMap) {
+fn parse_input(input: &str) -> (Vec<char>, MutationMap) {
     let mut parts = input.split("\n\n");
 
     let template: Vec<char> = parts
@@ -54,7 +54,7 @@ fn count_difference(input: &FnvHashMap<char, isize>) -> isize {
     maxcount - mincount
 }
 
-fn mutate(rules: &MutationMap, input: &Vec<char>, iterations: usize) -> isize {
+fn mutate(rules: &MutationMap, input: &[char], iterations: usize) -> isize {
     // Make sure all valid fragments have entries
     let mut fragment_counts = FnvHashMap::default();
     for (&from, _) in rules.iter() {

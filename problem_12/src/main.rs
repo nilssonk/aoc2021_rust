@@ -48,7 +48,7 @@ impl NodeStorage {
             };
 
             let index = self.data.push(Node {
-                node_type: node_type,
+                node_type,
                 connections: SmallVec::new(),
             });
             e.insert(index as u8);
@@ -76,23 +76,20 @@ impl NodeStorage {
 
             let node = unsafe { self.data.get_unchecked(this as usize) };
 
-            match node.node_type {
-                NodeType::SingleVisit => {
-                    if let Occupied(ref mut e) = allowed.entry(this) {
-                        let count = e.get_mut();
+            if let NodeType::SingleVisit = node.node_type {
+                if let Occupied(ref mut e) = allowed.entry(this) {
+                    let count = e.get_mut();
 
-                        if *count == 0 {
-                            if allow_double {
-                                allow_double = false;
-                            } else {
-                                continue;
-                            }
+                    if *count == 0 {
+                        if allow_double {
+                            allow_double = false;
                         } else {
-                            *count = 0;
+                            continue;
                         }
+                    } else {
+                        *count = 0;
                     }
                 }
-                _ => (),
             }
 
             for &c in node.connections.iter() {

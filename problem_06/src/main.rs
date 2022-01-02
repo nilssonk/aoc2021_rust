@@ -16,7 +16,7 @@ fn spawn(days: u16, until_spawn: u8, cache: &mut ResultCache) -> usize {
     result
 }
 
-fn simulate(input: &Vec<u8>, days: u16, cache: &mut ResultCache) -> usize {
+fn simulate(input: &[u8], days: u16, cache: &mut ResultCache) -> usize {
     input.iter().map(|&x| spawn(days, x, cache)).sum()
 }
 

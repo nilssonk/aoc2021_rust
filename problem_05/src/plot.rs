@@ -20,17 +20,18 @@ where
     let x1 = b.x;
     let y1 = b.y;
 
+    #[allow(clippy::collapsible_else_if)]
     if (y1 - y0).abs() < (x1 - x0).abs() {
         if x0 > x1 {
-            return plot_line_low(b, a);
+            plot_line_low(b, a)
         } else {
-            return plot_line_low(a, b);
+            plot_line_low(a, b)
         }
     } else {
         if y0 > y1 {
-            return plot_line_high(b, a);
+            plot_line_high(b, a)
         } else {
-            return plot_line_high(a, b);
+            plot_line_high(a, b)
         }
     }
 }
@@ -50,7 +51,7 @@ where
     let mut y = a.y;
 
     Box::new((a.x..(b.x + T::one())).map(move |x| {
-        let result = Vec2::<T> { x: x, y: y };
+        let result = Vec2::<T> { x, y };
 
         if d > T::zero() {
             y = y + yi;
@@ -78,7 +79,7 @@ where
     let mut x = a.x;
 
     Box::new((a.y..(b.y + T::one())).map(move |y| {
-        let result = Vec2::<T> { x: x, y: y };
+        let result = Vec2::<T> { x, y };
 
         if d > T::zero() {
             x = x + xi;

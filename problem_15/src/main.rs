@@ -52,7 +52,7 @@ fn a_star(input_at: impl Fn(Vec2) -> Option<u8>, start: Vec2, end: Vec2) -> Opti
 }
 
 fn solve_one(input: &Array2D<u8, Integer>) -> Integer {
-    let get_input_one = |v| input.get(v).and_then(|x| Some(*x));
+    let get_input_one = |v| input.get(v).copied();
     a_star(get_input_one, (0, 0), (input.width - 1, input.height - 1)).expect("No path exists")
 }
 
@@ -79,7 +79,7 @@ fn solve_two(input: &Array2D<u8, Integer>) -> Integer {
         input
             .get(v)
             .copied()
-            .and_then(|input| Some(transform(input, x_tile, y_tile)))
+            .map(|input| transform(input, x_tile, y_tile))
     };
 
     a_star(get_input_two, (0, 0), (new_width - 1, new_height - 1)).expect("No path exists")
@@ -100,7 +100,7 @@ fn main() {
     let width_one = first.len() as Integer;
 
     let map = Array2D::from_iter(
-        rows.flat_map(|s| s.chars()).map(|c| c as u8 - '0' as u8),
+        rows.flat_map(|s| s.chars()).map(|c| c as u8 - b'0'),
         width_one,
     );
 
